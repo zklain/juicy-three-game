@@ -1,10 +1,9 @@
-import { Box } from '@react-three/drei';
 import React, { useEffect } from 'react';
 import { useFrame, useThree } from 'react-three-fiber';
 import { Vector3 } from 'three';
 import { useSphere } from 'use-cannon';
 import { usePosition } from '../store';
-
+import TylerTrex from './TylerTrex';
 const Player = (props) => {
   const { camera } = useThree();
   const [ref, api] = useSphere(() => ({
@@ -34,9 +33,13 @@ const Player = (props) => {
   });
 
   return (
-    <Box ref={ref}>
-      <meshStandardMaterial attach='material' color='hotpink' />
-    </Box>
+    // <Dino />
+    <group ref={ref}>
+      <TylerTrex />
+    </group>
+    // <Box ref={ref}>
+    //   <meshStandardMaterial attach='material' color='hotpink' />
+    // </Box>
   );
 };
 
