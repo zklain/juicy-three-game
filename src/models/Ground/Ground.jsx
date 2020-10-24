@@ -34,9 +34,6 @@ const Ground = () => {
     const lastZ = lastPosition[2];
 
     if (playerZ < lastZ + GROUND_PIECE_LEN * 2) {
-      console.log('PLAYER', playerZ);
-      console.log('LAST', lastZ);
-      console.log('ADDING');
       const newLastPosition = [0, 0, lastZ - GROUND_PIECE_LEN];
       setLastPosition(newLastPosition);
       setGroundPieces([

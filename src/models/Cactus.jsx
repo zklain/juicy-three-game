@@ -7,6 +7,7 @@ export default ({ position }) => {
   return (
     <group position={position} scale={[1.5, 1.5, 1.5]}>
       <mesh
+        castShadow
         material={gltf.materials['DefaultMaterial.002']}
         geometry={gltf.nodes['defaultMaterial'].geometry}
       />

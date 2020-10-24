@@ -1,8 +1,27 @@
 import { Plane } from '@react-three/drei';
 import React, { useRef } from 'react';
 import { usePlane } from 'use-cannon';
-import { GROUND_PIECE_LEN, GROUND_PIECE_WIDTH } from '../../constants';
+import {
+  GROUND_PIECE_LEN,
+  GROUND_PIECE_WIDTH,
+  LEFT_BOUNDARY,
+  RIGHT_BOUNDDARY,
+} from '../../constants';
 import { Obstacle } from '../Obstactes';
+
+const generateObstaclePositions = (position) => {
+  const positions = [...new Array(5)].map((_, i) => {
+    const [x, y, z] = position;
+
+    const obsX = LEFT_BOUNDARY + Math.random() * 10;
+    const obsZ = z + Math.random() * (GROUND_PIECE_LEN - z);
+    return [obsX, y + 1.25, obsZ];
+  });
+
+  console.log(positions);
+
+  return positions;
+};
 
 const GroundPiece = ({ position, ...props }) => {
   const [ref] = usePlane(() => ({
@@ -12,17 +31,7 @@ const GroundPiece = ({ position, ...props }) => {
     ...props,
   }));
 
-  let obstaclesPositions = useRef(
-    [...new Array(3)].map((_, i) => {
-      const [x, y, z] = position;
-
-      const obsX = x + i;
-      const obsY = y + 1.5;
-      const obsZ = z + i;
-
-      return [obsX, obsY, obsZ];
-    })
-  );
+  let obstaclesPositions = useRef(generateObstaclePositions(position));
 
   return (
     <group>
@@ -30,7 +39,7 @@ const GroundPiece = ({ position, ...props }) => {
         args={[GROUND_PIECE_WIDTH, GROUND_PIECE_LEN]}
         ref={ref}
         receiveShadow>
-        <meshStandardMaterial attach='material' color='#fccc39' />
+        <meshStandardMaterial attach='material' color='#ffda8b' />
       </Plane>
       {obstaclesPositions.current.map((position) => (
         <Obstacle key={position[2]} position={position} />

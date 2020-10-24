@@ -6,12 +6,12 @@ source: https://sketchfab.com/3d-models/tyler-the-trex-7d4af25b9d94425ba10bc5d52
 title: Tyler The Trex
 */
 import * as THREE from 'three';
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, forwardRef } from 'react';
 import { useFrame } from 'react-three-fiber';
 import { useGLTF } from '@react-three/drei/useGLTF';
 import { useTexture } from '@react-three/drei';
 
-export default (props) => {
+export default forwardRef((props, ref) => {
   const group = useRef();
   const { nodes, materials, animations } = useGLTF('/models/dino/scene.gltf');
 
@@ -21,7 +21,7 @@ export default (props) => {
 
   const actions = useRef();
   const [mixer] = useState(() => new THREE.AnimationMixer());
-  useFrame((state, delta) => mixer.update(delta));
+  useFrame((state, delta) => mixer.update(delta * 7));
   useEffect(() => {
     actions.current = {
       'Tyler@Fishing': mixer.clipAction(animations[0], group.current),
@@ -29,30 +29,41 @@ export default (props) => {
       'Tyler@Talking': mixer.clipAction(animations[2], group.current),
       'Tyler@Walking': mixer.clipAction(animations[3], group.current),
     };
-    actions.current['Tyler@Idle'].play();
+    actions.current['Tyler@Walking'].play();
     return () => animations.forEach((clip) => mixer.uncacheClip(clip));
   }, []);
   return (
     <group
-      rotation={[0, Math.PI / 2, 0]}
+      rotation={[0, Math.PI, 0]}
       ref={group}
       {...props}
-      scale={[0.25, 0.25, 0.25]}>
+      scale={[0.3, 0.3, 0.3]}>
       <primitive object={nodes._rootJoint} />
       <skinnedMesh
+        castShadow
         material={materials.TylerTeethEyes}
         geometry={nodes.TylerMesh_TylerTeethEyes_0.geometry}
         skeleton={nodes.TylerMesh_TylerTeethEyes_0.skeleton}>
         <meshPhongMaterial attach='material' map={texture} skinning />
       </skinnedMesh>
       <skinnedMesh
+        castShadow
         material={materials.TylerSkin}
         geometry={nodes.TylerMesh_TylerSkin_0.geometry}
         skeleton={nodes.TylerMesh_TylerSkin_0.skeleton}>
-        <meshPhongMaterial attach='material' map={texture} skinning />
+        <meshStandardMaterial
+          metalness={0}
+          roughness={1}
+          attach='material'
+          color='green'
+          skinning
+        />
       </skinnedMesh>
     </group>
   );
-};
+});
+
+// TODO: animation speed
+// TODO: texture
 
 useGLTF.preload('/models/dino/scene.gltf');

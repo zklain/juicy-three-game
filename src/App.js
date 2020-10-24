@@ -11,7 +11,6 @@ import Ground from './models/Ground/Ground';
 import Player from './models/Player';
 import { usePosition } from './store';
 const SkyBox = () => {
-  const texture = new TextureLoader().load(desert);
   return (
     <Box args={[3000, 3000, 3000]} position={[0, 0, 0]}>
       <meshStandardMaterial color={'salmon'} side={BackSide} />
@@ -43,14 +42,7 @@ function App() {
 
 export default App;
 
-// todo: loading
-// todo: skybox
-// todo: jumping and movement
-// todo: start / stop
-// todo: score
-// todo: add obstales
-// todo: colision
-// todo: fog
-// todo: animation for
-// todo: terrain (how to move if the ground is not just a plane)
-// todo: models
+// todo: proper collision detection
+// todo: proper movement and jumping
+// todo: animations
+// todo: dust effect
