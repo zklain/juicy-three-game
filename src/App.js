@@ -19,22 +19,64 @@ import { usePlane } from 'use-cannon';
 import { usePosition } from './store';
 import { Sphere } from 'drei';
 
-const SPEED = 40;
+const SPEED = 10;
 const GROUND_PIECE_LEN = 50;
+const OF_PIECES = 4;
+
+const SkyBox = () => {
+  const texture = new TextureLoader().load(desert);
+  return (
+    <Box args={[3000, 3000, 3000]} position={[0, 0, 0]}>
+      <meshStandardMaterial color={'salmon'} side={BackSide} />
+    </Box>
+  );
+};
+
+// SOLUTION 1
+// keep position of the last piece
+// if the position less then, append new piece
 
 const Ground = () => {
-  const groundPieces = [...Array(3)].map((_, i) => {
-    return <GroundPiece position={[0, 0, -i * 50]} key={i} />;
-  });
+  const position = usePosition((state) => state.position);
+  const lastPosition = usePosition((state) => state.lastPosition);
+  const setLastPosition = usePosition((state) => state.setLastPosition);
+
+  const [groundPieces, setGroundPieces] = useState([]);
+
+  useEffect(() => {
+    const positions = [...Array(OF_PIECES)].map((_, i) => {
+      const position = [0, 0, -i * 50];
+      // last piece
+      if (i === OF_PIECES - 1) {
+        setLastPosition(position);
+      }
+
+      return position;
+    });
+
+    setGroundPieces(
+      positions.map((position, i) => {
+        return <GroundPiece position={position} key={i} />;
+      })
+    );
+  }, []);
 
   useFrame(({ clock }) => {
-    // ref.current.rotation.y += 1;
-    // console.log('TIME', clock.elapsedTime);
-    // todo: reset when end of plane
-  });
+    const playerZ = position[2];
+    const lastZ = lastPosition[2];
 
-  const [current, setCurrent] = useState();
-  useEffect(() => {}, [current]);
+    if (playerZ < lastZ + GROUND_PIECE_LEN * 2) {
+      console.log('PLAYER', playerZ);
+      console.log('LAST', lastZ);
+      console.log('ADDING');
+      const newLastPosition = [0, 0, lastZ - GROUND_PIECE_LEN];
+      setLastPosition(newLastPosition);
+      setGroundPieces([
+        ...groundPieces.slice(1),
+        <GroundPiece position={newLastPosition} color='red' key={lastZ} />,
+      ]);
+    }
+  });
 
   return <group>{groundPieces.map((_, index) => groundPieces[index])}</group>;
 };
@@ -48,8 +90,8 @@ const GroundPiece = ({ position, ...props }) => {
   }));
 
   useFrame(({ clock }) => {
-    const { z } = ref.current.position;
-    ref.current.position.copy(new Vector3(0, 0, z + clock.elapsedTime * 10));
+    // const { z } = ref.current.position;
+    // ref.current.position.copy(new Vector3(0, 0, z + clock.elapsedTime * SPEED));
   });
   // const texture = new TextureLoader().load(grass);
   // texture.wrapS = RepeatWrapping;
@@ -60,25 +102,11 @@ const GroundPiece = ({ position, ...props }) => {
     <Plane args={[10, 50]} ref={ref} receiveShadow>
       <meshStandardMaterial
         attach='material'
-        color='cyan'
+        color={props.color || 'cyan'}
         roughness={0.8}
         metalness={0.3}
       />
     </Plane>
-  );
-};
-
-const SkyBox = () => {
-  const texture = new TextureLoader().load(desert);
-  return (
-    <Box args={[3000, 3000, 3000]} position={[0, 0, 0]}>
-      <meshStandardMaterial color={'violet'} side={BackSide} />
-      {/* <meshStandardMaterial map={texture} side={BackSide} />
-      <meshStandardMaterial map={texture} side={BackSide} />
-      <meshStandardMaterial map={texture} side={BackSide} />
-      <meshStandardMaterial map={texture} side={BackSide} />
-      <meshStandardMaterial map={texture} side={BackSide} /> */}
-    </Box>
   );
 };
 
@@ -114,3 +142,4 @@ function App() {
 export default App;
 
 // todo: add new plane when reached the end of plane
+// todo: start / stop
