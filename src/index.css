@@ -18,3 +18,27 @@ body {
 #root {
   height: 100%;
 }
+
+.hud {
+  font-family: 'VT323';
+  font-size: 2rem;
+  color: #fff;
+  position: fixed;
+  z-index: 300;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  background-color: transparent;
+}
+.score {
+  position: absolute;
+  z-index: 400;
+  top: 2rem;
+  left: 2rem;
+  background-color: transparent;
+}
+
+canvas {
+  background-color: 'salmon';
+}

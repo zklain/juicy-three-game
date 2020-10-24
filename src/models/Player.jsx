@@ -1,5 +1,5 @@
 import { Box } from '@react-three/drei';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useFrame, useThree } from 'react-three-fiber';
 import { Vector3 } from 'three';
 import { useSphere } from 'use-cannon';
@@ -16,15 +16,21 @@ const Player = (props) => {
 
   const position = usePosition((state) => state.position);
   const setPosition = usePosition((state) => state.setPosition);
+  const incrementScore = usePosition((state) => state.incrementScore);
 
   useEffect(() => {
     api.position.subscribe((p) => setPosition(p));
+
+    // api.velocity.set(0, 0, -10);
   }, []);
 
   useFrame(({ clock }) => {
     const { x, y, z } = ref.current.position;
     camera.position.copy(new Vector3(x, y + 1.5, z + 3));
-    api.position.set(0, 0, clock.elapsedTime * -10);
+
+    if (Math.round(position[2]) % 100 === 0) {
+      incrementScore();
+    }
   });
 
   return (
@@ -35,5 +41,3 @@ const Player = (props) => {
 };
 
 export default Player;
-
-//todo: restrict rotation

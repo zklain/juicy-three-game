@@ -13,15 +13,18 @@ import { Physics, useSphere } from 'use-cannon';
 import { Camera } from './models/Camera';
 // import { Ground } from './models/Ground';
 import Player from './models/Player';
-import grass from './models/deserttext.jpg';
 import desert from './models/desert.jpg';
 import { usePlane } from 'use-cannon';
 import { usePosition } from './store';
 import { Sphere } from 'drei';
+import Cactus from './models/Cactus';
 
 const SPEED = 10;
 const GROUND_PIECE_LEN = 50;
+const GROUND_PIECE_WIDTH = 10;
 const OF_PIECES = 4;
+const LEFT_BOUNDARY = -5;
+const RIGHT_BOUNDDARY = 5;
 
 const SkyBox = () => {
   const texture = new TextureLoader().load(desert);
@@ -45,7 +48,7 @@ const Ground = () => {
 
   useEffect(() => {
     const positions = [...Array(OF_PIECES)].map((_, i) => {
-      const position = [0, 0, -i * 50];
+      const position = [0, 0, -i * GROUND_PIECE_LEN];
       // last piece
       if (i === OF_PIECES - 1) {
         setLastPosition(position);
@@ -73,12 +76,26 @@ const Ground = () => {
       setLastPosition(newLastPosition);
       setGroundPieces([
         ...groundPieces.slice(1),
-        <GroundPiece position={newLastPosition} color='red' key={lastZ} />,
+        <GroundPiece position={newLastPosition} key={lastZ} />,
       ]);
     }
   });
 
   return <group>{groundPieces.map((_, index) => groundPieces[index])}</group>;
+};
+
+const Obstacle = ({ position, ...props }) => {
+  const [ref] = useSphere(() => ({
+    position,
+    type: 'Dynamic',
+    ...props,
+  }));
+
+  return <Cactus position={position} />;
+  //   <Box args={[0.5, 3, 0.5]} ref={ref}>
+  //     <meshStandardMaterial color='#ff0000' />
+  //   </Box>
+  // );
 };
 
 const GroundPiece = ({ position, ...props }) => {
@@ -89,57 +106,64 @@ const GroundPiece = ({ position, ...props }) => {
     ...props,
   }));
 
-  useFrame(({ clock }) => {
-    // const { z } = ref.current.position;
-    // ref.current.position.copy(new Vector3(0, 0, z + clock.elapsedTime * SPEED));
-  });
-  // const texture = new TextureLoader().load(grass);
-  // texture.wrapS = RepeatWrapping;
-  // texture.wrapT = RepeatWrapping;
-  // texture.repeat.set(200, 200);
+  let obstaclesPositions = useRef(
+    [...new Array(3)].map((_, i) => {
+      const [x, y, z] = position;
+
+      const obsX = x + i;
+      const obsY = y + 1.5;
+      const obsZ = z + i;
+
+      return [obsX, obsY, obsZ];
+    })
+  );
 
   return (
-    <Plane args={[10, 50]} ref={ref} receiveShadow>
-      <meshStandardMaterial
-        attach='material'
-        color={props.color || 'cyan'}
-        roughness={0.8}
-        metalness={0.3}
-      />
-    </Plane>
+    <group>
+      <Plane
+        args={[GROUND_PIECE_WIDTH, GROUND_PIECE_LEN]}
+        ref={ref}
+        receiveShadow>
+        <meshStandardMaterial attach='material' color={props.color || 'cyan'} />
+      </Plane>
+      {obstaclesPositions.current.map((position) => (
+        <Obstacle key={position[2]} position={position} />
+      ))}
+    </group>
   );
 };
 
 function App() {
-  const Obstacles = [...Array(20)].map((i) => {
-    return (
-      <Box key={i} position={[0, 0, -i * 50]}>
-        <meshStandardMaterial attach='material' color='orange' />
-      </Box>
-    );
-  });
-
+  const score = usePosition((state) => state.score);
   return (
-    <Canvas shadowMap gl={{ alpha: false }}>
-      <Camera distance={3000} fov={50} />
-      {/* <Sky sunPosition={new Vector3(100, 10, -100)} /> */}
-      <ambientLight intensity={0.9} />
-      <pointLight castShadow intensity={0.8} position={[100, 100, 100]} />
-      <SkyBox />
-      <Physics>
-        <Ground />
-        {Obstacles.map((_, i) => (
-          <>{Obstacles[i]}</>
-        ))}
-        <Player />
-      </Physics>
-      <PointerLockControls />
-      {/* <OrbitControls /> */}
-    </Canvas>
+    <div className='hud'>
+      <div className='score'>{score}</div>
+      <Canvas shadowMap gl={{ alpha: false }}>
+        <Camera distance={3000} fov={50} />
+        <ambientLight intensity={0.3} />
+        <pointLight castShadow intensity={0.8} position={[100, 100, 100]} />
+        <SkyBox />
+        <Physics>
+          <Ground />
+          <Player />
+        </Physics>
+        <PointerLockControls />
+        {/* <OrbitControls /> */}
+      </Canvas>
+    </div>
   );
 }
 
 export default App;
 
-// todo: add new plane when reached the end of plane
+// todo: loading
+// todo: skybox
+// todo: jumping and movement
 // todo: start / stop
+// todo: score
+// todo: add obstales
+// todo: colision
+// todo: fog
+// todo: animation for
+// todo: terrain (how to move if the ground is not just a plane)
+// todo: models
